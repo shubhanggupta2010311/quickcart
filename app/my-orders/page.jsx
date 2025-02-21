@@ -1,26 +1,47 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { assets, orderDummyData } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Loading from "@/components/Loading";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const MyOrders = () => {
-  const { currency } = useAppContext();
+  const { currency, getToken, user } = useAppContext();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
-    setOrders(orderDummyData);
-    setLoading(false);
+    try {
+      const token = await getToken();
+      const { data } = await axios.get("/api/order/list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("API Response:", data);
+
+      if (data.success) {
+        setOrders(data.orders.reverse());
+        setLoading(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false); // ✅ Ensure loading stops in both success and error cases
+    }
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
 
   return (
     <>
@@ -32,6 +53,7 @@ const MyOrders = () => {
             <Loading />
           ) : (
             <div className="max-w-5xl border-t border-gray-300 text-sm">
+              {console.log("Rendering Orders:", orders)}
               {orders.map((order, index) => (
                 <div
                   key={index}
@@ -69,7 +91,7 @@ const MyOrders = () => {
                   </div>
                   <p className="font-medium my-auto">
                     {currency}
-                    {order.amount}
+                    {order.amout}
                   </p>
                   <div>
                     <p className="flex flex-col">
