@@ -33,7 +33,7 @@ const MyOrders = () => {
     } catch (error) {
       toast.error(error.message);
     } finally {
-      setLoading(false); // ✅ Ensure loading stops in both success and error cases
+      setLoading(false);
     }
   };
 
@@ -51,6 +51,10 @@ const MyOrders = () => {
           <h2 className="text-lg font-medium mt-6">My Orders</h2>
           {loading ? (
             <Loading />
+          ) : orders.length === 0 ? (
+            <div className="text-center text-gray-600">
+              <p>No orders found. Start shopping to place your first order!</p>
+            </div>
           ) : (
             <div className="max-w-5xl border-t border-gray-300 text-sm">
               {console.log("Rendering Orders:", orders)}
